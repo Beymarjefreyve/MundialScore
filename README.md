@@ -2,9 +2,9 @@
 
 MundialScore es una aplicación web completa para la gestión de pronósticos deportivos para el mundial o torneos de fútbol. Permite a los usuarios registrarse, realizar predicciones sobre los resultados de los partidos y competir en una tabla de clasificación basada en los puntos obtenidos por sus aciertos.
 
-##Admin
+## Admin
 
-La aplicacion cuenta con un admin por defecto con las credenciales: Email:admin@gmail.com Contraseña:1234 
+La aplicacion cuenta con un admin por defecto con las credenciales: Email: "admin@gmail.com" Contraseña: 1234 
 
 ## 🚀 Características Principales
 
@@ -137,4 +137,5 @@ La aplicación frontend estará disponible en `http://localhost:3000`.
 ### Leaderboard
 
 - `GET /api/leaderboard`: Obtener el ranking de usuarios.
+
 
