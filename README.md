@@ -4,20 +4,47 @@ MundialScore es una aplicación web completa para la gestión de pronósticos de
 
 ## Admin
 
-La aplicacion cuenta con un admin por defecto con las credenciales: Email: "admin@gmail.com" Contraseña: 1234 
+La aplicacion cuenta con un admin por defecto con las credenciales: Email: "admin@gmail.com" Contraseña: 1234
 
 ## 🚀 Características Principales
 
-- **Autenticación y Seguridad:** Registro e inicio de sesión seguro mediante JWT (JSON Web Tokens). Manejo de roles (Usuario y Administrador).
-- **Gestión de Partidos (Admin):** Los administradores pueden crear partidos y actualizar los marcadores finales.
-- **Sistema de Predicciones:** Los usuarios pueden ingresar sus pronósticos (goles local vs goles visitante) para los partidos pendientes.
-- **Cálculo Automático de Puntos:**
-  - **5 Puntos:** Resultado exacto (ej. Predicción 2-1, Resultado 2-1).
-  - **3 Puntos:** Acertar al ganador o empate, pero no el resultado exacto (ej. Predicción 2-0, Resultado 3-1).
-  - **1 Punto:** Acertar la cantidad de goles de al menos un equipo (ej. Predicción 1-1, Resultado 1-3).
-  - **0 Puntos:** No acertar nada.
-- **Tabla de Clasificación (Leaderboard):** Ranking en tiempo real de todos los usuarios ordenados por sus puntos totales.
-- **Interfaz Moderna:** Diseño responsivo y atractivo utilizando React y Tailwind CSS.
+- **Autenticación y Seguridad:**
+
+  - Sistema robusto de registro e inicio de sesión mediante **JWT (JSON Web Tokens)**.
+  - Protección de rutas y endpoints basada en roles: **Usuario** (acceso a predicciones y ranking) y **Administrador** (gestión total del sistema).
+
+- **Gestión de Partidos (Panel de Administrador):**
+
+  - Espacio exclusivo para administradores diseñado para gestionar el calendario del torneo.
+  - Permite **crear nuevos encuentros** especificando equipos, fecha, hora y estadio.
+  - Funcionalidad para **registrar marcadores finales**, lo cual cierra el partido y dispara automáticamente el motor de cálculo de puntos para todos los usuarios.
+
+- **Sistema de Predicciones (Juego):**
+
+  - Los usuarios pueden ingresar sus pronósticos (goles local vs visitante) para cualquier partido programado.
+  - **Reglas de Tiempo:** Las predicciones solo se admiten **antes de la hora de inicio** del partido. El sistema bloquea automáticamente intentos posteriores.
+  - **Mis Predicciones:** Sección personal donde el usuario puede filtrar entre:
+    - _Pendientes:_ Partidos por jugar.
+    - _Finalizados:_ Historial de aciertos y puntos obtenidos.
+
+- **Cálculo Automático de Puntos (Scoring):**
+
+  - El sistema evalúa cada pronóstico contra el resultado real y asigna puntos según la precisión:
+  - **5 Puntos (Pleno):** Resultado exacto (ej. Predicción 2-1, Resultado 2-1).
+  - **3 Puntos (Ganador/Empate):** Acierto del desenlace (ganador o empate) pero no el marcador exacto (ej. Predicción 2-0, Resultado 3-1).
+  - **1 Punto (Goles):** Acierto en la cantidad de goles de al menos un equipo (ej. Predicción 1-1, Resultado 1-3).
+  - **0 Puntos:** Ninguna coincidencia relevante.
+
+- **Tabla de Clasificación (Leaderboard):**
+
+  - Ranking global actualizado en tiempo real.
+  - **Podio Visual:** Destaca a los 3 mejores usuarios con un diseño especial de medallas.
+  - Lista completa paginada o scrolleable de todos los participantes ordenados por puntaje total descendente.
+
+- **Interfaz Moderna y Responsiva:**
+  - Desarrollada con **React 19** y **Tailwind CSS**.
+  - Diseño "Mobile-First" adaptativo a cualquier dispositivo.
+  - Tema oscuro (Dark Mode) con paleta de colores vibrante inspirada en fútbol (verdes neón y fondos oscuros).
 
 ## 🛠️ Stack Tecnológico
 
@@ -25,12 +52,12 @@ La aplicacion cuenta con un admin por defecto con las credenciales: Email: "admi
 
 - **Java 17**
 - **Spring Boot 3.2.0**
-  - Spring Web (REST API)
-  - Spring Data JPA (Persistencia)
-  - Spring Security (Autenticación/Autorización)
-- **PostgreSQL** (Base de Datos)
-- **JWT** (jjwt 0.11.5) para manejo de sesiones stateless.
-- **Swagger/OpenAPI** (springdoc 2.3.0) para documentación de API.
+  - Spring Web
+  - Spring Data JPA
+  - Spring Security
+- **PostgreSQL**
+- **JWT**
+- **Swagger/OpenAPI**
 
 ### Frontend
 
@@ -137,5 +164,3 @@ La aplicación frontend estará disponible en `http://localhost:3000`.
 ### Leaderboard
 
 - `GET /api/leaderboard`: Obtener el ranking de usuarios.
-
-

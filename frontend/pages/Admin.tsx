@@ -135,7 +135,7 @@ export const Admin: React.FC = () => {
 
                   return (
                      <Card key={match.id} className="p-0 overflow-hidden">
-                        <div className="h-24 bg-[url('https://picsum.photos/seed/stadium2/600/200')] bg-cover relative">
+                        <div className="h-24 bg-[url('https://upload.wikimedia.org/wikipedia/commons/b/b9/Wembley_Stadium_Full.jpg')] bg-cover relative">
                            <div className="absolute inset-0 bg-gradient-to-t from-field-card to-transparent"></div>
                            <div className="absolute bottom-3 left-4">
                               <Badge className="bg-black/50 backdrop-blur text-white border border-white/10">Mundial</Badge>
@@ -194,7 +194,7 @@ export const Admin: React.FC = () => {
                   return (
                      <div key={match.id} className="bg-field-input/50 rounded-xl p-3 flex items-center gap-4 border border-white/5">
                         <div className="w-16 h-12 bg-gray-700 rounded-lg overflow-hidden">
-                           <img src="https://picsum.photos/seed/stadium3/100/100" className="w-full h-full object-cover grayscale opacity-50" />
+                           <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Soccerball.svg/480px-Soccerball.svg.png" className="w-full h-full object-cover grayscale opacity-50" />
                         </div>
                         <div className="flex-1">
                            <div className="text-[10px] text-gray-500 uppercase font-bold">Finalizado</div>

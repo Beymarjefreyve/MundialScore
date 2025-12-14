@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Trophy, CalendarDays, ClipboardList, LogOut, LayoutDashboard, Dribbble } from 'lucide-react';
+import { Trophy, CalendarDays, ClipboardList, LogOut, LayoutDashboard, Dribbble, Shield } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
     const location = useLocation();
@@ -13,7 +13,7 @@ export const Sidebar: React.FC = () => {
         { label: 'Partidos', path: '/', icon: <LayoutDashboard size={20} /> },
         { label: 'Mis Predicciones', path: '/my-predictions', icon: <ClipboardList size={20} /> },
         { label: 'Leaderboard', path: '/leaderboard', icon: <Trophy size={20} /> },
-        { label: 'Admin', path: '/admin', icon: <LogOut size={20} className="rotate-180" /> },
+        { label: 'Admin', path: '/admin', icon: <Shield size={20} /> },
     ];
 
     const handleLogout = () => {
@@ -61,7 +61,7 @@ export const Sidebar: React.FC = () => {
                             : 'text-gray-400 hover:bg-white/5 hover:text-white'
                             }`}
                     >
-                        <LogOut size={20} className="rotate-180" />
+                        <Shield size={20} />
                         Admin
                     </button>
                 )}
@@ -70,7 +70,7 @@ export const Sidebar: React.FC = () => {
             <div className="mt-auto">
                 <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-colors group relative">
                     <div className="w-8 h-8 rounded-full bg-gray-700 overflow-hidden">
-                        <img src="https://picsum.photos/seed/me/200" alt="Profile" className="w-full h-full object-cover" />
+                        <img src="https://ui-avatars.com/api/?name=User&background=random" alt="Profile" className="w-full h-full object-cover" />
                     </div>
                     <div className="text-xs flex-1">
                         <div className="font-bold">Mi Cuenta</div>

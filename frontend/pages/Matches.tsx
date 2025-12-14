@@ -30,7 +30,7 @@ const MatchItem: React.FC<{ match: Match; onPredict: () => void }> = ({ match, o
     <Card className="mb-4 overflow-hidden relative group">
       {/* Background Image Effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-field-card to-field-card/80 z-0"></div>
-      <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/stadium/600/300')] bg-cover opacity-10 mix-blend-overlay z-0"></div>
+      <div className="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/b/b9/Wembley_Stadium_Full.jpg')] bg-cover opacity-10 mix-blend-overlay z-0"></div>
 
       <div className="relative z-10">
         {match.status && (
@@ -54,7 +54,7 @@ const MatchItem: React.FC<{ match: Match; onPredict: () => void }> = ({ match, o
         <div className="flex items-center text-xs text-gray-400 mb-6 gap-3">
           <span className="flex items-center gap-1">
             <Calendar size={12} />
-            {isLive ? match.estadio : (match.fechaHora ? new Date(match.fechaHora).toLocaleDateString('es-ES', { weekday: 'long', hour: '2-digit', minute: '2-digit' }) : 'TBD')}
+            {isLive ? match.estadio : (match.fechaHora ? new Date(match.fechaHora).toLocaleString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'TBD')}
           </span>
           <span>•</span>
           <span>{match.estadio}</span>
@@ -112,7 +112,27 @@ export const Matches: React.FC = () => {
     fetchMatches();
   }, []);
 
-  const hasMatches = matches.length > 0;
+  // Filter matches based on active filter and status
+  const filteredMatches = matches.filter(match => {
+    // 1. Global Filter: Exclude matches that have a result/are finished
+    // Based on user request "unicamente deben aparecer partidos que aun no se han jugado"
+    const hasResult = match.golesLocal !== null && match.golesLocal !== undefined;
+    if (hasResult) return false;
+
+    // 2. Tab Filter
+    if (filter === 'Hoy') {
+      if (!match.fechaHora) return false;
+      const matchDate = new Date(match.fechaHora);
+      const today = new Date();
+      return matchDate.getDate() === today.getDate() &&
+        matchDate.getMonth() === today.getMonth() &&
+        matchDate.getFullYear() === today.getFullYear();
+    }
+    // 'Todos' includes all pending matches
+    return true;
+  });
+
+  const hasMatches = filteredMatches.length > 0;
 
   return (
     <div className="p-6">
@@ -181,7 +201,7 @@ export const Matches: React.FC = () => {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
-            {matches.map(match => (
+            {filteredMatches.map(match => (
               <MatchItem key={match.id} match={match} onPredict={() => navigate(`/predict/${match.id}`)} />
             ))}
           </div>

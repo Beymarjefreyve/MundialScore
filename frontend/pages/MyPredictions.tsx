@@ -29,7 +29,20 @@ export const MyPredictions: React.FC = () => {
          .finally(() => setLoading(false));
    }, []);
 
-   const hasPredictions = predictions.length > 0;
+   const filteredPredictions = predictions.filter(pred => {
+      const partido = pred.partido || {};
+      const hasResult = partido.golesLocal !== null && partido.golesLocal !== undefined &&
+                        partido.golesVisitante !== null && partido.golesVisitante !== undefined;
+      
+      if (activeTab === 'Pendientes') return !hasResult;
+      if (activeTab === 'Finalizados') return hasResult;
+      return true;
+   });
+
+   const hasPredictions = filteredPredictions.length > 0;
+
+   // Check if user has ANY predictions at all to decide message vs empty filter
+   const hasAnyPredictions = predictions.length > 0;
 
    if (loading) return <div className="p-10 flex justify-center"><RefreshCw className="animate-spin text-field" /></div>;
 
@@ -60,17 +73,22 @@ export const MyPredictions: React.FC = () => {
                <div className="w-20 h-20 bg-field-input rounded-full flex items-center justify-center mb-6">
                   <span className="text-3xl">⚽</span>
                </div>
-               <h3 className="text-xl font-bold mb-2">No tienes predicciones</h3>
+               <h3 className="text-xl font-bold mb-2">
+                  {hasAnyPredictions ? 'No hay predicciones en esta categoría' : 'No tienes predicciones'}
+               </h3>
                <p className="text-gray-400 text-sm mb-8">
-                  Parece que aún no has hecho predicciones para los partidos del mundial. ¡Juega ahora!
+                  {hasAnyPredictions 
+                     ? 'Prueba cambiando el filtro o realiza nuevas predicciones.' 
+                     : 'Parece que aún no has hecho predicciones para los partidos del mundial. ¡Juega ahora!'
+                  }
                </p>
-               <Button onClick={() => navigate('/')}>
-                  Ver Partidos Disponibles
+               <Button onClick={() => hasAnyPredictions ? setActiveTab('Todos') : navigate('/')}>
+                  {hasAnyPredictions ? 'Limpiar Filtros' : 'Ver Partidos Disponibles'}
                </Button>
             </div>
          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-               {predictions.map(pred => {
+               {filteredPredictions.map(pred => {
                   // Map backend field names to frontend expectations
                   // Backend returns: partido (with equipoLocal, equipoVisitante, fechaHora, estadio, golesLocal, golesVisitante)
                   //                  golesLocalPronosticados, golesVisitantePronosticados, puntosObtenidos

@@ -66,6 +66,12 @@ export const PredictionPage: React.FC = () => {
    const homeTeam = typeof homeTeamName === 'string' ? getTeamProps(homeTeamName) : homeTeamName as any;
    const awayTeam = typeof awayTeamName === 'string' ? getTeamProps(awayTeamName) : awayTeamName as any;
 
+   // Check if match is finished (backend returns null if not played, or we check if values exist)
+   // Backend Partido: golesLocal, golesVisitante are null if not played.
+   const hasResult = (match as any).golesLocal !== null && (match as any).golesLocal !== undefined;
+   const isStarted = new Date() >= new Date(matchDate);
+   const isLocked = hasResult || isStarted;
+
    return (
       <div className="min-h-screen flex flex-col w-full max-w-xl mx-auto">
          <header className="p-6 flex items-center justify-between sticky top-0 bg-field-dark/95 backdrop-blur z-20">
@@ -127,7 +133,8 @@ export const PredictionPage: React.FC = () => {
                      type="number"
                      value={homeScore}
                      onChange={(e) => setHomeScore(e.target.value)}
-                     className="w-full aspect-square bg-field-input border border-white/10 rounded-3xl text-center text-5xl font-bold focus:border-field focus:ring-1 focus:ring-field outline-none transition-all"
+                     disabled={isLocked}
+                     className={`w-full aspect-square bg-field-input border border-white/10 rounded-3xl text-center text-5xl font-bold focus:border-field focus:ring-1 focus:ring-field outline-none transition-all ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                      placeholder="-"
                   />
                </div>
@@ -140,16 +147,26 @@ export const PredictionPage: React.FC = () => {
                      type="number"
                      value={awayScore}
                      onChange={(e) => setAwayScore(e.target.value)}
-                     className="w-full aspect-square bg-field-input border border-white/10 rounded-3xl text-center text-5xl font-bold focus:border-field focus:ring-1 focus:ring-field outline-none transition-all"
+                     disabled={isLocked}
+                     className={`w-full aspect-square bg-field-input border border-white/10 rounded-3xl text-center text-5xl font-bold focus:border-field focus:ring-1 focus:ring-field outline-none transition-all ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                      placeholder="-"
                   />
                </div>
             </div>
 
             <div className="mt-auto w-full">
-               <Button fullWidth className="text-lg py-4 shadow-xl shadow-green-900/30" onClick={handleSubmit}>
-                  ENVIAR PREDICCIÓN
-               </Button>
+               {isLocked ? (
+                  <div className="w-full bg-red-500/20 border border-red-500/50 rounded-xl p-4 flex items-center gap-3 justify-center mb-4">
+                     <AlertCircle className="text-red-500" />
+                     <span className="text-red-200 font-medium">
+                        {hasResult ? 'El partido ha finalizado' : 'El partido ya ha comenzado'}
+                     </span>
+                  </div>
+               ) : (
+                  <Button fullWidth className="text-lg py-4 shadow-xl shadow-green-900/30" onClick={handleSubmit}>
+                     ENVIAR PREDICCIÓN
+                  </Button>
+               )}
                <p className="text-center text-[10px] text-gray-500 mt-4">
                   Las predicciones se cierran 5 minutos antes del inicio.
                </p>

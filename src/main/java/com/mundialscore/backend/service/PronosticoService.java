@@ -40,13 +40,9 @@ public class PronosticoService {
                 .findFirst();
 
         Pronostico pronostico;
-        Integer puntosViejos = 0;
 
         if (existing.isPresent()) {
             pronostico = existing.get();
-            if (pronostico.getPuntosObtenidos() != null) {
-                puntosViejos = pronostico.getPuntosObtenidos();
-            }
             pronostico.setGolesLocalPronosticados(request.getGolesLocal());
             pronostico.setGolesVisitantePronosticados(request.getGolesVisitante());
         } else {
@@ -57,16 +53,14 @@ public class PronosticoService {
             pronostico.setGolesVisitantePronosticados(request.getGolesVisitante());
         }
 
-        // Calculate points immediately if match has result
+        // Block if match finished
         if (partido.hasResult()) {
-            int puntosNuevos = calcularPuntos(pronostico, partido);
-            pronostico.setPuntosObtenidos(puntosNuevos);
+            throw new RuntimeException("El partido ya ha finalizado, no se pueden hacer pronósticos.");
+        }
 
-            int diff = puntosNuevos - puntosViejos;
-            if (diff != 0) {
-                usuario.setPuntosTotales(usuario.getPuntosTotales() + diff);
-                usuarioRepository.save(usuario);
-            }
+        // Block if match started
+        if (partido.getFechaHora().isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("El partido ya ha comenzado, no se pueden hacer pronósticos.");
         }
 
         return pronosticoRepository.save(pronostico);
@@ -77,34 +71,4 @@ public class PronosticoService {
         return pronosticoRepository.findByUsuarioId(usuario.getId());
     }
 
-    private int calcularPuntos(Pronostico p, Partido m) {
-        if (!m.hasResult())
-            return 0;
-
-        int realL = m.getGolesLocal();
-        int realV = m.getGolesVisitante();
-        int predL = p.getGolesLocalPronosticados();
-        int predV = p.getGolesVisitantePronosticados();
-
-        // 1. Exacto
-        if (realL == predL && realV == predV) {
-            return 5;
-        }
-
-        // Determine winners (1: Local, 0: Draw, -1: Visitor)
-        int realSign = Integer.signum(realL - realV);
-        int predSign = Integer.signum(predL - predV);
-
-        // 2. Ganador o Empate
-        if (realSign == predSign) {
-            return 3;
-        }
-
-        // 3. Goles de un solo equipo
-        if (realL == predL || realV == predV) {
-            return 1;
-        }
-
-        return 0;
-    }
 }
