@@ -22,8 +22,9 @@ const MatchItem: React.FC<{ match: Match; onPredict: () => void }> = ({ match, o
     return found || { name: teamName, code: teamName.substring(0, 3).toUpperCase(), color: 'border-white' };
   };
 
-  const home = typeof match.homeTeam === 'string' ? getTeamProps(match.homeTeam) : match.homeTeam as any;
-  const away = typeof match.awayTeam === 'string' ? getTeamProps(match.awayTeam) : match.awayTeam as any;
+  // Use backend field names (equipoLocal, equipoVisitante)
+  const home = getTeamProps(match.equipoLocal || '');
+  const away = getTeamProps(match.equipoVisitante || '');
 
   return (
     <Card className="mb-4 overflow-hidden relative group">
@@ -53,10 +54,10 @@ const MatchItem: React.FC<{ match: Match; onPredict: () => void }> = ({ match, o
         <div className="flex items-center text-xs text-gray-400 mb-6 gap-3">
           <span className="flex items-center gap-1">
             <Calendar size={12} />
-            {isLive ? match.stadium : new Date(match.date).toLocaleDateString('es-ES', { weekday: 'long', hour: '2-digit', minute: '2-digit' })}
+            {isLive ? match.estadio : (match.fechaHora ? new Date(match.fechaHora).toLocaleDateString('es-ES', { weekday: 'long', hour: '2-digit', minute: '2-digit' }) : 'TBD')}
           </span>
           <span>•</span>
-          <span>{match.stadium}</span>
+          <span>{match.estadio}</span>
         </div>
 
         <div className="flex items-center justify-between mt-4">
@@ -70,7 +71,7 @@ const MatchItem: React.FC<{ match: Match; onPredict: () => void }> = ({ match, o
           </div>
 
           {isLive ? (
-            <span className="font-mono text-xl font-bold">{match.homeScore} - {match.awayScore}</span>
+            <span className="font-mono text-xl font-bold">{match.golesLocal} - {match.golesVisitante}</span>
           ) : (
             <Button size="sm" className="py-2 px-4 text-xs" onClick={onPredict}>
               Hacer Predicción

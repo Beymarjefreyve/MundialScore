@@ -31,7 +31,14 @@ export const Admin: React.FC = () => {
    const handleCreateMatch = async (e: React.FormEvent) => {
       e.preventDefault();
       try {
-         await crearPartido(newMatch);
+         // Map frontend fields to backend DTO field names
+         const partidoData = {
+            equipoLocal: newMatch.homeTeam,
+            equipoVisitante: newMatch.awayTeam,
+            fechaHora: newMatch.date,
+            estadio: newMatch.stadium
+         };
+         await crearPartido(partidoData);
          setShowCreateForm(false);
          setNewMatch({ homeTeam: '', awayTeam: '', date: '', stadium: '' });
          fetchMatches();
@@ -44,9 +51,10 @@ export const Admin: React.FC = () => {
 
    const handleSetResult = async (matchId: number) => {
       try {
+         // Map frontend fields to backend DTO field names
          await registrarResultadoPartido(matchId, {
-            homeScore: parseInt(scoreInput.home),
-            awayScore: parseInt(scoreInput.away)
+            golesLocal: parseInt(scoreInput.home),
+            golesVisitante: parseInt(scoreInput.away)
          });
          setEditingMatchId(null);
          setScoreInput({ home: '', away: '' });
@@ -121,9 +129,9 @@ export const Admin: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-               {matches.filter(m => !m.homeScore).map(match => { // naive filter for 'upcoming' or no score
-                  const home = typeof match.homeTeam === 'string' ? getTeamProps(match.homeTeam) : match.homeTeam as any;
-                  const away = typeof match.awayTeam === 'string' ? getTeamProps(match.awayTeam) : match.awayTeam as any;
+               {matches.filter(m => m.golesLocal === null || m.golesLocal === undefined).map(match => { // filter for 'upcoming' matches with no score
+                  const home = getTeamProps(match.equipoLocal || '');
+                  const away = getTeamProps(match.equipoVisitante || '');
 
                   return (
                      <Card key={match.id} className="p-0 overflow-hidden">
@@ -140,9 +148,9 @@ export const Admin: React.FC = () => {
                               <span className="font-bold text-lg">{away.name}</span>
                            </div>
                            <div className="flex items-center gap-4 text-xs text-gray-400 mb-4">
-                              <span className="flex items-center gap-1"><CalendarIcon size={12} /> {new Date(match.date).toLocaleString()}</span>
+                              <span className="flex items-center gap-1"><CalendarIcon size={12} /> {match.fechaHora ? new Date(match.fechaHora).toLocaleString() : 'TBD'}</span>
                               <span>•</span>
-                              <span>{match.stadium}</span>
+                              <span>{match.estadio}</span>
                            </div>
 
                            <div className="flex items-center justify-between">
@@ -180,21 +188,21 @@ export const Admin: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-               {matches.filter(m => m.homeScore !== undefined).map(match => {
-                  const home = typeof match.homeTeam === 'string' ? getTeamProps(match.homeTeam) : match.homeTeam as any;
-                  const away = typeof match.awayTeam === 'string' ? getTeamProps(match.awayTeam) : match.awayTeam as any;
+               {matches.filter(m => m.golesLocal !== null && m.golesLocal !== undefined).map(match => {
+                  const home = getTeamProps(match.equipoLocal || '');
+                  const away = getTeamProps(match.equipoVisitante || '');
                   return (
                      <div key={match.id} className="bg-field-input/50 rounded-xl p-3 flex items-center gap-4 border border-white/5">
                         <div className="w-16 h-12 bg-gray-700 rounded-lg overflow-hidden">
                            <img src="https://picsum.photos/seed/stadium3/100/100" className="w-full h-full object-cover grayscale opacity-50" />
                         </div>
                         <div className="flex-1">
-                           <div className="text-[10px] text-gray-500 uppercase font-bold">Ayer</div>
+                           <div className="text-[10px] text-gray-500 uppercase font-bold">Finalizado</div>
                            <div className="font-bold text-sm">{home.name} vs {away.name}</div>
-                           <div className="text-xs text-gray-500">{match.stadium}</div>
+                           <div className="text-xs text-gray-500">{match.estadio}</div>
                         </div>
                         <div className="px-3 py-1 bg-black/40 rounded-lg font-mono font-bold border border-white/5">
-                           {match.homeScore} - {match.awayScore}
+                           {match.golesLocal} - {match.golesVisitante}
                         </div>
                      </div>
                   );

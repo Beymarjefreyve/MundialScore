@@ -30,11 +30,11 @@ export const PredictionPage: React.FC = () => {
    const handleSubmit = async () => {
       if (!match || !homeScore || !awayScore) return;
       try {
+         // Send with backend expected field names
          await crearPronostico({
-            matchId: match.id,
-            userId: 1, // Mock user ID or from context, user didn't specify auth flow context fully
-            homeScore: parseInt(homeScore),
-            awayScore: parseInt(awayScore)
+            partidoId: match.id,
+            golesLocal: parseInt(homeScore),
+            golesVisitante: parseInt(awayScore)
          });
          navigate('/my-predictions');
       } catch (err) {
@@ -52,8 +52,19 @@ export const PredictionPage: React.FC = () => {
    if (loading) return <div className="p-6 text-center">Cargando...</div>;
    if (error || !match) return <div className="p-6 text-center text-red-500">{error || 'Partido no encontrado'}</div>;
 
-   const homeTeam = typeof match.homeTeam === 'string' ? getTeamProps(match.homeTeam) : match.homeTeam as any;
-   const awayTeam = typeof match.awayTeam === 'string' ? getTeamProps(match.awayTeam) : match.awayTeam as any;
+   // Map backend field names to frontend names
+   const homeTeamName = (match as any).equipoLocal || match.homeTeam;
+   const awayTeamName = (match as any).equipoVisitante || match.awayTeam;
+   const matchDate = (match as any).fechaHora || match.date;
+   const matchStadium = (match as any).estadio || match.stadium;
+
+   // Validate that the match has required data
+   if (!homeTeamName || !awayTeamName) {
+      return <div className="p-6 text-center text-red-500">Este partido tiene datos incompletos</div>;
+   }
+
+   const homeTeam = typeof homeTeamName === 'string' ? getTeamProps(homeTeamName) : homeTeamName as any;
+   const awayTeam = typeof awayTeamName === 'string' ? getTeamProps(awayTeamName) : awayTeamName as any;
 
    return (
       <div className="min-h-screen flex flex-col w-full max-w-xl mx-auto">
@@ -94,11 +105,11 @@ export const PredictionPage: React.FC = () => {
                <div className="mt-8 pt-6 border-t border-white/10 flex flex-col items-center gap-2 text-sm text-gray-400">
                   <div className="flex items-center gap-2">
                      <Calendar size={14} />
-                     <span>{new Date(match.date).toLocaleString()}</span>
+                     <span>{new Date(matchDate).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                      <MapPin size={14} />
-                     <span>{match.stadium}</span>
+                     <span>{matchStadium}</span>
                   </div>
                </div>
             </div>

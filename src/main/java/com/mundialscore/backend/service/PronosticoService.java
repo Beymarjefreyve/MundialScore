@@ -40,8 +40,13 @@ public class PronosticoService {
                 .findFirst();
 
         Pronostico pronostico;
+        Integer puntosViejos = 0;
+
         if (existing.isPresent()) {
             pronostico = existing.get();
+            if (pronostico.getPuntosObtenidos() != null) {
+                puntosViejos = pronostico.getPuntosObtenidos();
+            }
             pronostico.setGolesLocalPronosticados(request.getGolesLocal());
             pronostico.setGolesVisitantePronosticados(request.getGolesVisitante());
         } else {
@@ -52,11 +57,54 @@ public class PronosticoService {
             pronostico.setGolesVisitantePronosticados(request.getGolesVisitante());
         }
 
+        // Calculate points immediately if match has result
+        if (partido.hasResult()) {
+            int puntosNuevos = calcularPuntos(pronostico, partido);
+            pronostico.setPuntosObtenidos(puntosNuevos);
+
+            int diff = puntosNuevos - puntosViejos;
+            if (diff != 0) {
+                usuario.setPuntosTotales(usuario.getPuntosTotales() + diff);
+                usuarioRepository.save(usuario);
+            }
+        }
+
         return pronosticoRepository.save(pronostico);
     }
 
     public List<Pronostico> obtenerMisPronosticos(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow();
         return pronosticoRepository.findByUsuarioId(usuario.getId());
+    }
+
+    private int calcularPuntos(Pronostico p, Partido m) {
+        if (!m.hasResult())
+            return 0;
+
+        int realL = m.getGolesLocal();
+        int realV = m.getGolesVisitante();
+        int predL = p.getGolesLocalPronosticados();
+        int predV = p.getGolesVisitantePronosticados();
+
+        // 1. Exacto
+        if (realL == predL && realV == predV) {
+            return 5;
+        }
+
+        // Determine winners (1: Local, 0: Draw, -1: Visitor)
+        int realSign = Integer.signum(realL - realV);
+        int predSign = Integer.signum(predL - predV);
+
+        // 2. Ganador o Empate
+        if (realSign == predSign) {
+            return 3;
+        }
+
+        // 3. Goles de un solo equipo
+        if (realL == predL || realV == predV) {
+            return 1;
+        }
+
+        return 0;
     }
 }

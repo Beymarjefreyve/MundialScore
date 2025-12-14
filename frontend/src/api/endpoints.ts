@@ -9,10 +9,17 @@ export interface User {
 
 export interface Match {
     id: number;
-    homeTeam: string;
-    awayTeam: string;
-    date: string;
-    stadium: string;
+    equipoLocal: string;
+    equipoVisitante: string;
+    fechaHora: string;
+    estadio: string;
+    golesLocal?: number;
+    golesVisitante?: number;
+    // Frontend-friendly aliases (for backwards compatibility)
+    homeTeam?: string;
+    awayTeam?: string;
+    date?: string;
+    stadium?: string;
     homeScore?: number;
     awayScore?: number;
     status?: string; // e.g. 'scheduled', 'live', 'finished'
@@ -20,10 +27,9 @@ export interface Match {
 
 export interface Prediction {
     id?: number;
-    matchId: number;
-    userId: number;
-    homeScore: number;
-    awayScore: number;
+    partidoId: number;
+    golesLocal: number;
+    golesVisitante: number;
 }
 
 export const login = (credentials: any) => request<any>('/api/auth/login', {

@@ -14,18 +14,27 @@ const RankAvatar: React.FC<{ user: any; rank: number }> = ({ user, rank }) => {
    const label = isFirst ? 'Campeón' : isSecond ? 'Plata' : 'Bronce';
    const glow = isFirst ? 'shadow-[0_0_30px_rgba(250,204,21,0.3)]' : '';
 
+   // Map backend field names to frontend expectations
+   const name = user.nombre || user.name || 'Usuario';
+   const points = user.puntosTotales ?? user.points ?? 0;
+   const initials = name.substring(0, 2).toUpperCase();
+
    return (
       <div className={`flex flex-col items-center ${isFirst ? '-mt-8 z-10' : ''}`}>
          <div className="text-field font-bold text-xl mb-2">{rank}°</div>
-         <div className={`relative rounded-full border-4 ${borderColor} ${size} ${glow} overflow-hidden bg-field-card`}>
-            <img src={user.avatarUrl || 'https://via.placeholder.com/150'} alt={user.name} className="w-full h-full object-cover" />
+         <div className={`relative rounded-full border-4 ${borderColor} ${size} ${glow} overflow-hidden bg-field-card flex items-center justify-center`}>
+            {user.avatarUrl ? (
+               <img src={user.avatarUrl} alt={name} className="w-full h-full object-cover" />
+            ) : (
+               <span className="text-2xl font-bold text-white">{initials}</span>
+            )}
          </div>
          <div className={`${badgeColor} px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide -mt-3 relative z-20 shadow-lg`}>
             {label}
          </div>
          <div className="mt-2 text-center">
-            <div className="font-bold text-sm truncate max-w-[100px]">{user.name}</div>
-            <div className="text-field font-bold text-sm">{user.points} pts</div>
+            <div className="font-bold text-sm truncate max-w-[100px]">{name}</div>
+            <div className="text-field font-bold text-sm">{points} pts</div>
          </div>
       </div>
    );
@@ -52,7 +61,8 @@ export const Leaderboard: React.FC = () => {
    // If API data does not have rank, I should map index+1.
    const dataWithRank = leaaderboardData.map((u, i) => ({ ...u, rank: i + 1 }));
    const top3WithRank = dataWithRank.slice(0, 3);
-   const rest = dataWithRank.slice(3);
+   // Show ALL users in the list below the podium (not just 4th+)
+   const allUsers = dataWithRank;
 
    // Reorder for visual podium: 2nd, 1st, 3rd
    // Need to be careful if less than 3 items
@@ -78,18 +88,28 @@ export const Leaderboard: React.FC = () => {
          </div>
 
          <div className="flex-1 flex flex-col gap-3 pb-24 md:pb-0">
-            {rest.map((user) => (
+            {allUsers.map((user) => {
+               // Map backend field names
+               const name = user.nombre || user.name || 'Usuario';
+               const points = user.puntosTotales ?? user.points ?? 0;
+               const initials = name.substring(0, 2).toUpperCase();
+               
+               return (
                <div key={user.id} className="bg-field-card rounded-2xl p-3 flex items-center justify-between border border-white/5">
                   <div className="flex items-center gap-4">
                      <span className="font-bold text-gray-500 w-6 text-center">{user.rank}</span>
-                     <div className="w-10 h-10 rounded-full bg-field-input overflow-hidden">
-                        <img src={user.avatarUrl || 'https://via.placeholder.com/150'} alt={user.name} className="w-full h-full object-cover" />
+                     <div className="w-10 h-10 rounded-full bg-field-input overflow-hidden flex items-center justify-center">
+                        {user.avatarUrl ? (
+                           <img src={user.avatarUrl} alt={name} className="w-full h-full object-cover" />
+                        ) : (
+                           <span className="text-sm font-bold text-white">{initials}</span>
+                        )}
                      </div>
-                     <span className="font-bold text-sm">{user.name}</span>
+                     <span className="font-bold text-sm">{name}</span>
                   </div>
-                  <span className="font-bold text-white">{user.points} pts</span>
+                  <span className="font-bold text-white">{points} pts</span>
                </div>
-            ))}
+            )})}
          </div>
 
       </div>

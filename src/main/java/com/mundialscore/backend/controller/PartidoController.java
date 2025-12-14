@@ -5,6 +5,7 @@ import com.mundialscore.backend.service.PartidoService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,5 +24,10 @@ public class PartidoController {
     @GetMapping
     public ResponseEntity<List<Partido>> obtenerPartidos() {
         return ResponseEntity.ok(partidoService.obtenerTodos());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Partido> obtenerPartido(@PathVariable Long id) {
+        return ResponseEntity.ok(partidoService.obtenerPorId(id));
     }
 }

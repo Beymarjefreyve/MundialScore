@@ -8,22 +8,28 @@ import { register } from '../src/api/endpoints';
 export const Register: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault(); // Need to set form onSubmit (it was just div/button before?)
-    // The original code had form, but button had onClick navigate.
-    // I should change Button type to submit and remove onClick, or handle onClick.
-    // And gather data.
+    e.preventDefault();
     setLoading(true);
+    setError(null);
+
     const formData = new FormData(e.target as HTMLFormElement);
-    const data = Object.fromEntries(formData);
+    const data = {
+      nombre: formData.get('nombre'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+    };
 
     try {
       await register(data);
+      // Redirect to login after successful registration
       navigate('/login');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Error en registro');
+      // Show specific error message from backend
+      setError(err.message || 'Error en registro');
     } finally {
       setLoading(false);
     }
@@ -54,9 +60,15 @@ export const Register: React.FC = () => {
         </div>
 
         <form className="w-full flex flex-col gap-4" onSubmit={handleRegister}>
+          {error && (
+            <p className="text-red-500 text-sm text-center bg-red-500/10 p-3 rounded-lg">
+              {error}
+            </p>
+          )}
+
           <Input
             label="NOMBRE COMPLETO"
-            name="name"
+            name="nombre"
             placeholder="Ej. Juan Pérez"
             className="bg-field-input border-transparent focus:border-field py-3"
           />

@@ -33,6 +33,11 @@ public class PartidoService {
         return partidoRepository.findAll();
     }
 
+    public Partido obtenerPorId(Long id) {
+        return partidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Partido no encontrado"));
+    }
+
     public Partido crearPartido(PartidoRequest request) {
         Partido partido = new Partido();
         partido.setEquipoLocal(request.getEquipoLocal());

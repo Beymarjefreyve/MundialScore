@@ -71,13 +71,34 @@ export const MyPredictions: React.FC = () => {
          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                {predictions.map(pred => {
-                  // Safe access if match is missing
-                  const match = pred.match || {};
-                  const homeTeam = match.homeTeam || { name: '?', code: '?', color: '' };
-                  const awayTeam = match.awayTeam || { name: '?', code: '?', color: '' };
+                  // Map backend field names to frontend expectations
+                  // Backend returns: partido (with equipoLocal, equipoVisitante, fechaHora, estadio, golesLocal, golesVisitante)
+                  //                  golesLocalPronosticados, golesVisitantePronosticados, puntosObtenidos
+                  const partido = pred.partido || {};
+                  const equipoLocal = partido.equipoLocal || '?';
+                  const equipoVisitante = partido.equipoVisitante || '?';
+                  const fechaHora = partido.fechaHora;
+                  
+                  // Create team display objects
+                  const homeTeam = { 
+                     name: equipoLocal, 
+                     code: equipoLocal.substring(0, 3).toUpperCase(), 
+                     color: '' 
+                  };
+                  const awayTeam = { 
+                     name: equipoVisitante, 
+                     code: equipoVisitante.substring(0, 3).toUpperCase(), 
+                     color: '' 
+                  };
 
-                  const isPending = pred.status === 'pending' || !pred.status; // Default to pending
-                  const isCorrect = pred.status === 'correct';
+                  // Check if match has result (partido has golesLocal and golesVisitante set)
+                  const hasResult = partido.golesLocal !== null && partido.golesLocal !== undefined &&
+                                   partido.golesVisitante !== null && partido.golesVisitante !== undefined;
+                  const isPending = !hasResult;
+                  
+                  // If has result, check if prediction was correct (puntosObtenidos > 0)
+                  const puntosObtenidos = pred.puntosObtenidos || 0;
+                  const isCorrect = hasResult && puntosObtenidos > 0;
 
                   return (
                      <Card key={pred.id} className="p-0 overflow-hidden">
@@ -94,7 +115,7 @@ export const MyPredictions: React.FC = () => {
                               <div>
                                  <h4 className="font-bold text-sm">{homeTeam.name} vs {awayTeam.name}</h4>
                                  <p className="text-[10px] text-gray-400 flex items-center gap-1">
-                                    {match.date ? new Date(match.date).toLocaleDateString() : '-'} • {match.date ? new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                    {fechaHora ? new Date(fechaHora).toLocaleDateString() : '-'} • {fechaHora ? new Date(fechaHora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
                                  </p>
                               </div>
                            </div>
@@ -103,7 +124,7 @@ export const MyPredictions: React.FC = () => {
                               <Badge className="bg-white/10 text-gray-300">Pendiente</Badge>
                            ) : (
                               <Badge color={isCorrect ? 'bg-field' : 'bg-red-500/20 text-red-500'}>
-                                 {isCorrect ? `+${pred.pointsEarned} Pts` : '0 Pts'}
+                                 {isCorrect ? `+${puntosObtenidos} Pts` : '0 Pts'}
                               </Badge>
                            )}
                         </div>
@@ -112,16 +133,16 @@ export const MyPredictions: React.FC = () => {
                            <div className="flex flex-col">
                               <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Resultado</span>
                               <span className="text-lg font-mono font-bold">
-                                 {isPending ? '- -' : `${match.homeScore} - ${match.awayScore}`}
+                                 {isPending ? '- -' : `${partido.golesLocal} - ${partido.golesVisitante}`}
                               </span>
                            </div>
 
                            <div className="flex flex-col items-end">
                               <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Tu Predicción</span>
                               <span className={`text-lg font-mono font-bold flex gap-3 ${!isPending && !isCorrect ? 'text-gray-400 line-through decoration-red-500' : 'text-field'}`}>
-                                 <span>{pred.homeScore}</span>
+                                 <span>{pred.golesLocalPronosticados}</span>
                                  <span>-</span>
-                                 <span>{pred.awayScore}</span>
+                                 <span>{pred.golesVisitantePronosticados}</span>
                               </span>
                            </div>
                         </div>

@@ -3,6 +3,8 @@ package com.mundialscore.backend.service;
 import com.mundialscore.backend.dto.AuthDtos.AuthResponse;
 import com.mundialscore.backend.dto.AuthDtos.LoginRequest;
 import com.mundialscore.backend.dto.AuthDtos.RegisterRequest;
+import com.mundialscore.backend.dto.AuthDtos.UserInfo;
+import com.mundialscore.backend.exception.EmailAlreadyExistsException;
 import com.mundialscore.backend.model.Rol;
 import com.mundialscore.backend.model.Usuario;
 import com.mundialscore.backend.repository.UsuarioRepository;
@@ -32,20 +34,23 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
+        // Check for existing email
+        if (usuarioRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("El email ya está registrado");
+        }
+
         Usuario user = new Usuario();
         user.setNombre(request.getNombre());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        if ("admin@mundialscore.com".equalsIgnoreCase(request.getEmail())) {
-            user.setRol(Rol.ADMIN);
-        } else {
-            user.setRol(Rol.USER);
-        }
+        user.setRol(Rol.USER); // Todos los usuarios registrados tienen rol USER
         user.setPuntosTotales(0);
 
         usuarioRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
-        return new AuthResponse(jwtToken);
+
+        UserInfo userInfo = new UserInfo(user.getId(), user.getNombre(), user.getEmail(), user.getRol().name());
+        return new AuthResponse(jwtToken, userInfo);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -56,6 +61,8 @@ public class AuthService {
         var user = usuarioRepository.findByEmail(request.getEmail())
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
-        return new AuthResponse(jwtToken);
+
+        UserInfo userInfo = new UserInfo(user.getId(), user.getNombre(), user.getEmail(), user.getRol().name());
+        return new AuthResponse(jwtToken, userInfo);
     }
 }
